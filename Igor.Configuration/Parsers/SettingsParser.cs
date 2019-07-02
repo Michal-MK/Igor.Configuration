@@ -1,12 +1,13 @@
 ﻿using System;
 
 namespace Igor.Configuration {
-	public static class SettingsParser<T> {
+	internal static class SettingsParser<T> {
 		private const string BOOL = "Boolean";
 		private const string STRING = "String";
+		private const string INT = "Int32";
 
 
-		public static void ParseLine(T ret, string line) {
+		internal static void ParseLine(T ret, string line) {
 			if (line.StartsWith("#") || string.IsNullOrEmpty(line)) {
 				return;
 			}
@@ -29,6 +30,11 @@ namespace Igor.Configuration {
 					settingsType.GetProperty(propertyName).SetValue(ret, value);
 					return;
 				}
+				case INT: {
+					int value = ParseInt(split[1], out string propertyName);
+					settingsType.GetProperty(propertyName).SetValue(ret, value);
+					return;
+				}
 			}
 		}
 
@@ -42,6 +48,12 @@ namespace Igor.Configuration {
 			string[] split = line.Split('=');
 			propertyName = split[0];
 			return split[1] == "True";
+		}
+
+		private static int ParseInt(string line, out string propertyName) {
+			string[] split = line.Split('=');
+			propertyName = split[0];
+			return int.Parse(split[1]);
 		}
 	}
 }

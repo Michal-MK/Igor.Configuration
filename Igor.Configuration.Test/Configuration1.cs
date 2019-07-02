@@ -16,6 +16,10 @@ namespace Igor.Configuration.Test {
 		[Comment("RUN FOREST")]
 		public bool Run { get; set; } = true;
 
+		public int TestInt { get; set; } = 5181235;
+
+		[Comment("An Integer ith comment")]
+		public int Value { get; set; } = 124;
 
 		public string ConfigurationHeader() {
 			return "";

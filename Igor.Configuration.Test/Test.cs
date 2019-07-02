@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace Igor.Configuration.Test {
 	class Test {
@@ -26,7 +25,6 @@ namespace Igor.Configuration.Test {
 
 			ConfigurationManager<Conf2>.Initialize(@"Test/conf.configuration", true);
 			Conf2 c3 = ConfigurationManager<Conf2>.Instance.CurrentSettings;
-
 		}
 	}
 }
