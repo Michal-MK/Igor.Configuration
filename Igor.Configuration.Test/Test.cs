@@ -15,7 +15,7 @@ namespace Igor.Configuration.Test {
 			Console.WriteLine("SUCCESS");
 
 			try {
-				ConfigurationManager<Conf2>.Initialize(@"C:\config.cfg", true);
+				ConfigurationManager<Conf2>.Initialize(@"C:\config.cfg", forceLoadDefaults: true);
 				Conf2 c2 = ConfigurationManager<Conf2>.Instance.CurrentSettings;
 				Console.WriteLine("INVALID");
 			}
@@ -23,7 +23,7 @@ namespace Igor.Configuration.Test {
 				Console.WriteLine("SUCCESS");
 			}
 
-			ConfigurationManager<Conf2>.Initialize(@"Test/conf.configuration", true);
+			ConfigurationManager<Conf2>.Initialize(@"Test/conf.configuration", forceLoadDefaults: true);
 			Conf2 c3 = ConfigurationManager<Conf2>.Instance.CurrentSettings;
 		}
 	}

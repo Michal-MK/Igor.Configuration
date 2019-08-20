@@ -12,9 +12,16 @@ namespace Igor.Configuration {
 
 		public int SettingsInitFailure { get; private set; } = 0;
 
-		public static bool Initialize(string configurationFilePath = "Settings/.config", bool forceLoadDefaults = false) {
-			Instance = new ConfigurationManager<T>(configurationFilePath);
+		public static bool Initialize(string configurationFilePath = "Settings/.config", bool forceLoadDefaults = false, string paramExecutablePath = ".") {
+			if (paramExecutablePath == ".") {
+				ExecutablePath = AppDomain.CurrentDomain.BaseDirectory;
+			}
+			else {
+				ExecutablePath = paramExecutablePath;
+			}
 
+			Instance = new ConfigurationManager<T>(configurationFilePath);
+			
 			if (forceLoadDefaults) {
 				bool loaded = Instance.Load();
 				if (!loaded) {
@@ -31,7 +38,7 @@ namespace Igor.Configuration {
 				configFile = configFilePath;
 			}
 			else {
-				configFile = executablePath + configFilePath;
+				configFile = Path.Combine(ExecutablePath, configFilePath);
 			}
 			FileInfo file = new FileInfo(configFile);
 			if (!file.Directory.Exists) {
@@ -41,8 +48,8 @@ namespace Igor.Configuration {
 
 		#endregion
 
-		private static string executablePath { get; set; } = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar;
-		private string configFile { get; set; }
+		internal static string ExecutablePath { get; set; }
+		private string configFile;
 
 		public T CurrentSettings { get; private set; }
 
@@ -77,8 +84,8 @@ namespace Igor.Configuration {
 		}
 
 		private bool Load() {
-			if (!Directory.Exists(executablePath)) {
-				Directory.CreateDirectory(executablePath);
+			if (!Directory.Exists(ExecutablePath)) {
+				Directory.CreateDirectory(ExecutablePath);
 			}
 
 			try {
@@ -92,12 +99,15 @@ namespace Igor.Configuration {
 			}
 		}
 
-		public int Save() {
+
+
+		public static int Save(T currentSettings, string path) {
+			
 			try {
-				if (File.Exists(configFile)) {
-					File.Delete(configFile);
+				if (File.Exists(path)) {
+					File.Delete(path);
 				}
-				File.WriteAllText(configFile, ToFileRep(CurrentSettings));
+				File.WriteAllText(path, ToFileRep(currentSettings));
 				return 0;
 			}
 			catch {
@@ -105,7 +115,10 @@ namespace Igor.Configuration {
 			}
 		}
 
-		private string ToFileRep(T currentSettings) {
+
+		public int Save() => Save(CurrentSettings, configFile); 
+
+		private static string ToFileRep(T currentSettings) {
 			Type t = typeof(T);
 			StringBuilder str = new StringBuilder();
 

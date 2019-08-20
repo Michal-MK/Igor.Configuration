@@ -6,7 +6,7 @@ namespace Igor.Configuration {
 		internal string Comment { get; set; }
 
 		public CommentAttribute(string comment = "") {
-			Comment = comment;
+			Comment = string.IsNullOrWhiteSpace(comment) ? "" : comment;
 		}
 	}
 }
