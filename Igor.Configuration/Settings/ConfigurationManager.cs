@@ -12,12 +12,12 @@ namespace Igor.Configuration {
 
 		public int SettingsInitFailure { get; private set; } = 0;
 
-		public static bool Initialize(string configurationFilePath = "Settings/.config", bool forceLoadDefaults = false, string paramExecutablePath = ".") {
-			if (paramExecutablePath == ".") {
-				ExecutablePath = AppDomain.CurrentDomain.BaseDirectory;
+		public static bool Initialize(string configurationFilePath = "Settings/.config", bool forceLoadDefaults = false, string exePath = ".") {
+			if (exePath == ".") {
+				_executablePath = AppDomain.CurrentDomain.BaseDirectory;
 			}
 			else {
-				ExecutablePath = paramExecutablePath;
+				_executablePath = exePath;
 			}
 
 			Instance = new ConfigurationManager<T>(configurationFilePath);
@@ -38,7 +38,7 @@ namespace Igor.Configuration {
 				configFile = configFilePath;
 			}
 			else {
-				configFile = Path.Combine(ExecutablePath, configFilePath);
+				configFile = Path.Combine(_executablePath, configFilePath);
 			}
 			FileInfo file = new FileInfo(configFile);
 			if (!file.Directory.Exists) {
@@ -48,8 +48,8 @@ namespace Igor.Configuration {
 
 		#endregion
 
-		internal static string ExecutablePath { get; set; }
-		private string configFile;
+		internal static string _executablePath;
+		private readonly string configFile;
 
 		public T CurrentSettings { get; private set; }
 
@@ -71,7 +71,7 @@ namespace Igor.Configuration {
 			try {
 				using (StreamReader reader = new StreamReader(configFile)) {
 					while (!reader.EndOfStream) {
-						SettingsParser<T>.ParseLine(ret, reader.ReadLine());
+						SettingsParser<T>.ParseLine(ret, reader.ReadLine(),reader);
 					}
 				}
 			}
@@ -84,8 +84,8 @@ namespace Igor.Configuration {
 		}
 
 		private bool Load() {
-			if (!Directory.Exists(ExecutablePath)) {
-				Directory.CreateDirectory(ExecutablePath);
+			if (!Directory.Exists(_executablePath)) {
+				Directory.CreateDirectory(_executablePath);
 			}
 
 			try {
@@ -99,10 +99,7 @@ namespace Igor.Configuration {
 			}
 		}
 
-
-
 		public static int Save(T currentSettings, string path) {
-			
 			try {
 				if (File.Exists(path)) {
 					File.Delete(path);
@@ -115,7 +112,6 @@ namespace Igor.Configuration {
 			}
 		}
 
-
 		public int Save() => Save(CurrentSettings, configFile); 
 
 		private static string ToFileRep(T currentSettings) {
@@ -123,20 +119,15 @@ namespace Igor.Configuration {
 			StringBuilder str = new StringBuilder();
 
 			if (!string.IsNullOrWhiteSpace(currentSettings.ConfigurationHeader())) {
-				str.Append("# ");
-				str.Append(currentSettings.ConfigurationHeader());
-				str.Append(Environment.NewLine);
+				str.AppendLine($"# {currentSettings.ConfigurationHeader()}");
 			}
 
 			foreach (PropertyInfo prop in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)) {
 				CommentAttribute comment = prop.GetCustomAttribute<CommentAttribute>();
 				if (comment != null) {
-					str.Append("# ");
-					str.Append(comment.Comment);
-					str.Append(Environment.NewLine);
+					str.AppendLine($"# {comment.Comment}");
 				}
-				str.Append($"{prop.PropertyType.Name}:{prop.Name}={prop.GetValue(currentSettings)}");
-				str.Append(Environment.NewLine);
+				str.AppendLine($"{prop.PropertyType.Name}:{prop.Name}={prop.GetValue(currentSettings)}");
 			}
 			return str.ToString();
 		}

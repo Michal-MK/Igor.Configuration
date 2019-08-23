@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 
 namespace Igor.Configuration {
 	internal static class SettingsParser<T> {
@@ -7,7 +9,7 @@ namespace Igor.Configuration {
 		private const string INT = "Int32";
 
 
-		internal static void ParseLine(T ret, string line) {
+		internal static void ParseLine(T ret, string line, StreamReader reader) {
 			if (line.StartsWith("#") || string.IsNullOrEmpty(line)) {
 				return;
 			}
@@ -26,7 +28,7 @@ namespace Igor.Configuration {
 					return;
 				}
 				case STRING: {
-					string value = ParseString(split[1], out string propertyName);
+					string value = ParseString(split[1], reader, out string propertyName);
 					settingsType.GetProperty(propertyName).SetValue(ret, value);
 					return;
 				}
@@ -38,10 +40,33 @@ namespace Igor.Configuration {
 			}
 		}
 
-		private static string ParseString(string line, out string propertyName) {
+		private static string ParseString(string line, StreamReader reader, out string propertyName) {
 			string[] split = line.Split('=');
 			propertyName = split[0];
+			if (split[1].StartsWith("\"")) {
+				StringBuilder builder = new StringBuilder(split[1].Remove(0, 1) + Environment.NewLine);
+				do {
+					string nextLine = reader.ReadLine();
+					builder.AppendLine(nextLine);
+				}
+				while (!Terminated(builder));
+				int newLineQuote = Environment.NewLine.Length + 1;
+
+				string result = builder.ToString();
+				result = result.Replace("\\\"", "\"");
+
+				result = result.Remove(result.Length - newLineQuote, newLineQuote);
+				return result;
+			}
 			return split[1].Trim();
+		}
+
+		private static bool Terminated(StringBuilder builder) {
+			int nlLength = Environment.NewLine.Length;
+			if (builder[builder.Length - nlLength - 1] == '"') {
+				return builder[builder.Length - nlLength - 2] != '\\';
+			}
+			return false;
 		}
 
 		private static bool ParseBool(string line, out string propertyName) {
