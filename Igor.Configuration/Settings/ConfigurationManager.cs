@@ -121,12 +121,20 @@ namespace Igor.Configuration {
 			StringBuilder str = new StringBuilder();
 
 			if (!string.IsNullOrWhiteSpace(currentSettings.ConfigurationHeader())) {
-				str.AppendLine($"# {currentSettings.ConfigurationHeader()}");
+				string header = currentSettings.ConfigurationHeader();
+
+				if (!header.StartsWith("#")) {
+					header = "# " + header;
+				}
+				str.AppendLine(header);
 			}
 
 			foreach (PropertyInfo prop in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)) {
 				CommentAttribute comment = prop.GetCustomAttribute<CommentAttribute>();
 				if (comment != null) {
+					if (comment.NewLine) {
+						str.AppendLine();
+					}
 					str.AppendLine($"# {comment.Comment}");
 				}
 				if (prop.PropertyType.IsArray) {
