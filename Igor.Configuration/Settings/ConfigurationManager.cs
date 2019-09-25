@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -21,7 +23,7 @@ namespace Igor.Configuration {
 			}
 
 			Instance = new ConfigurationManager<T>(configurationFilePath);
-			
+
 			if (forceLoadDefaults) {
 				bool loaded = Instance.Load();
 				if (!loaded) {
@@ -71,7 +73,7 @@ namespace Igor.Configuration {
 			try {
 				using (StreamReader reader = new StreamReader(configFile)) {
 					while (!reader.EndOfStream) {
-						SettingsParser<T>.ParseLine(ret, reader.ReadLine(),reader);
+						ConfigParser<T>.ParseLine(ret, reader.ReadLine(), reader);
 					}
 				}
 			}
@@ -112,7 +114,7 @@ namespace Igor.Configuration {
 			}
 		}
 
-		public int Save() => Save(CurrentSettings, configFile); 
+		public int Save() => Save(CurrentSettings, configFile);
 
 		private static string ToFileRep(T currentSettings) {
 			Type t = typeof(T);
@@ -127,9 +129,52 @@ namespace Igor.Configuration {
 				if (comment != null) {
 					str.AppendLine($"# {comment.Comment}");
 				}
-				str.AppendLine($"{prop.PropertyType.Name}:{prop.Name}={prop.GetValue(currentSettings)}");
+				if (prop.PropertyType.IsArray) {
+					throw new InvalidOperationException("Arrays are not supported, use a List instead");
+				}
+				if (prop.PropertyType.GetInterface(typeof(IEnumerable).Name) != null && prop.PropertyType != typeof(string)) {
+					if (prop.PropertyType.IsGenericType) {
+						Type[] generics = prop.PropertyType.GetGenericArguments();
+						str.Append(prop.PropertyType.Name.Remove(prop.PropertyType.Name.IndexOf("`")));
+						str.Append("<" + string.Join<string>(",", generics.Select(tt => tt.Name)) + ">");
+						str.AppendLine($":{prop.Name}={{");
+						str.AppendLine(FormatCollection((IEnumerable)prop.GetValue(currentSettings)));
+						str.AppendLine("}");
+					}
+				}
+				else {
+					str.AppendLine($"{prop.PropertyType.Name}:{prop.Name}={prop.GetValue(currentSettings)}");
+				}
 			}
 			return str.ToString();
+		}
+
+		private static string FormatCollection(IEnumerable col) {
+			StringBuilder builder = new StringBuilder();
+			if (col == null) {
+				return "";
+			}
+			IEnumerator enumerator = col.GetEnumerator();
+			if (!enumerator.MoveNext()) {
+				return "";
+			}
+			if (enumerator.Current is string s && s.Split('\n').Length > 1) {
+				builder.Append("\"" + s + "\"");
+			}
+			else {
+				builder.Append(enumerator.Current.ToString());
+			}
+			string SEP = "," + Environment.NewLine;
+			while (enumerator.MoveNext()) {
+				builder.Append(SEP);
+				if (enumerator.Current is string ss && ss.Split('\n').Length > 1) {
+					builder.Append("\"" + ss + "\"");
+				}
+				else {
+					builder.Append(enumerator.Current.ToString());
+				}
+			}
+			return builder.ToString();
 		}
 	}
 }
