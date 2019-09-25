@@ -9,7 +9,9 @@ namespace Igor.Configuration.Test {
 			config.Help = "NOOOOOO";
 			config.Run = false;
 			config.OtherInfo = "None";
-			config.Ints.AddRange(new[] { 0, 0, 2, 3, 4, 5, 5, 5, 5, 6, 7, 8, 9 });
+			for (int i = 0; i < config.Ints.Count; i++) {
+				config.Ints[i] += 10;
+			}
 
 			ConfigurationManager<Configuration1>.Instance.Save();
 
