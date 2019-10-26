@@ -25,6 +25,9 @@ namespace Igor.Configuration.Test {
 		[Comment("List of ints")]
 		public List<int> Ints { get; set; } = new List<int> { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
 
+		[Comment("List of bytes")]
+		public List<byte> Bytes { get; set; } = new List<byte> { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+
 
 		public List<string> Strings { get; set; } = new List<string> { "Teset", "Testings vwfew", "awvlrtpoqwlksdmvlav", "wevirtnpolsnzxc", "ribeprbaneklwvddd", "vwevmkknlffkm", "qwertyuiopasdfghjklzxcvbnm", "mveopasdvklerbnaduficmiosd", "1111111111111111" };
 		public string ConfigurationHeader() {
