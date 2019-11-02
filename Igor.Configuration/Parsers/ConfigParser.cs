@@ -9,6 +9,7 @@ namespace Igor.Configuration {
 		private const string BOOL = "Boolean";
 		private const string STRING = "String";
 		private const string INT = "Int32";
+		private const string BYTE = "Byte";
 		private const string ARRAY = ">";
 
 		internal static void ParseLine(T ret, string line, StreamReader reader) {
@@ -41,6 +42,11 @@ namespace Igor.Configuration {
 						settingsType.GetProperty(split[1].Split('=')[0]).SetValue(ret, value);
 						return;
 					}
+					case BYTE: {
+						ICollection<byte> value = ParseList(reader, s => byte.Parse(s.TrimEnd(',')));
+						settingsType.GetProperty(split[1].Split('=')[0]).SetValue(ret, value);
+						return;
+					}
 				}
 			}
 			else {
@@ -60,6 +66,12 @@ namespace Igor.Configuration {
 						settingsType.GetProperty(propertyName).SetValue(ret, value);
 						return;
 					}
+					case BYTE: {
+						byte value = ParseByte(split[1], out string propertyName);
+						settingsType.GetProperty(propertyName).SetValue(ret, value);
+						return;
+					}
+
 				}
 			}
 		}
@@ -102,7 +114,7 @@ namespace Igor.Configuration {
 				result = result.Replace("\\\"", "\"");
 
 				result = result.Remove(result.Length - newLineQuote);
-				if(terminator == ',')
+				if (terminator == ',')
 					result = result.Remove(result.Length - 1);
 				return result;
 			}
@@ -131,6 +143,12 @@ namespace Igor.Configuration {
 			string[] split = line.Split('=');
 			propertyName = split[0];
 			return int.Parse(split[1]);
+		}
+
+		private static byte ParseByte(string line, out string propertyName) {
+			string[] split = line.Split('=');
+			propertyName = split[0];
+			return byte.Parse(split[1]);
 		}
 	}
 }

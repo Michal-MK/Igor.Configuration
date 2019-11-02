@@ -12,6 +12,10 @@ namespace Igor.Configuration.Test {
 			for (int i = 0; i < config.Ints.Count; i++) {
 				config.Ints[i] += 10;
 			}
+			for (int i = 0; i < config.Bytes.Count; i++) {
+				config.Bytes[i] += 10;
+			}
+
 
 			ConfigurationManager<Configuration1>.Instance.Save();
 
