@@ -7,7 +7,7 @@ namespace Igor.Configuration.Test {
 		[Comment("Help to get")]
 		public string Help { get; set; } = "Test";
 
-		public string OtherInfo { get; set; } = "Some info about something";
+		public string OtherInfo { get; set; } = "Some info about something=";
 
 		[Comment("Include this crap inside of whatever that it")]
 		public bool IncludeMe { get; set; } = false;

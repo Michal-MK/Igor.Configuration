@@ -17,7 +17,7 @@ namespace Igor.Configuration {
 				return;
 			}
 
-			string[] split = line.SplitFirstN(':', 1);
+			string[] split = line.Split(new[] { ':' }, 2);
 			if (split.Length != 2) {
 				throw new InvalidOperationException(line);
 			}
@@ -98,7 +98,7 @@ namespace Igor.Configuration {
 		}
 
 		private static string ParseString(string line, StreamReader reader, out string propertyName) {
-			string[] split = line.Split('=');
+			string[] split = line.Split(new[] { '=' }, 2);
 			propertyName = split[0];
 			char terminator = string.IsNullOrEmpty(propertyName) ? ',' : '"';
 			if (split[1].StartsWith("\"")) {
