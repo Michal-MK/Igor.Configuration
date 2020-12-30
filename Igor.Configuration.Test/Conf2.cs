@@ -1,7 +1,9 @@
-﻿namespace Igor.Configuration.Test {
+﻿using System;
+
+namespace Igor.Configuration.Test {
 	internal class Conf2 : IConfiguration {
 		public string ConfigurationHeader() {
-			return "Empty configuration";
+			return "#Empty configuration" + Environment.NewLine + " #Containing a new line" + Environment.NewLine + "...and another one";
 		}
 
 		public bool Set { get; set; }

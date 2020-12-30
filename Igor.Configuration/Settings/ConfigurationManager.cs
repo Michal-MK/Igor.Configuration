@@ -126,6 +126,11 @@ namespace Igor.Configuration {
 				if (!header.StartsWith("#")) {
 					header = "# " + header;
 				}
+				header = string.Join(Environment.NewLine, header.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Select(s => {
+					if (s.StartsWith("#")) return s;
+					return "# " + s;
+				}));
+
 				str.AppendLine(header);
 			}
 
